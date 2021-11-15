@@ -1,5 +1,7 @@
 package com.pluralsight.repository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -7,10 +9,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.pluralsight.repository.util.RideRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.pluralsight.model.Ride;
@@ -23,39 +29,29 @@ public class RideRepositoryImpl implements RideRepository {
 
 	@Override
 	public List<Ride> getRides() {
-		List<Ride> rides = jdbcTemplate.query("select * from ride", new RowMapper<Ride>() {
-			@Override
-			public Ride mapRow(ResultSet resultSet, int i) throws SQLException {
-				Ride ride = new Ride();
-				ride.setId(resultSet.getInt("id"));
-				ride.setName(resultSet.getString("name"));
-				ride.setDuration(resultSet.getInt("duration"));
-				return ride;
-			}
-		});
+		List<Ride> rides = jdbcTemplate.query("select * from ride", new RideRowMapper());
 		return rides;
 	}
 
 	@Override
 	public Ride createRide(Ride ride) {
-		//jdbcTemplate.update("insert into ride (NAME, DURATION) values(?,?)",ride.getName(), ride.getDuration());
-
-		SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate);
-
-		// Set Columns
-		List<String> columns = new ArrayList<>();
-		columns.add("name");
-		columns.add("duration");
-
-		insert.setTableName("ride");
-		insert.setColumnNames(columns);
-
-		Map<String, Object> data = new HashMap<>();
-		data.put("name", ride.getName());
-		data.put("duration", ride.getDuration());
-
-		insert.setGeneratedKeyName("id"); // autoincremented id
-		return null;
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+		jdbcTemplate.update(new PreparedStatementCreator() {
+			@Override
+			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+				PreparedStatement ps = connection.prepareStatement("insert into ride (NAME, DURATION) values(?,?)",
+						new String[] {"id"});
+				ps.setString(1, ride.getName());
+				ps.setInt(2, ride.getDuration());
+				return ps;
+			}
+		}, keyHolder);
+		Number id = keyHolder.getKey();
+		return getRide(id.intValue());
 	}
 
+	public Ride getRide(int id) {
+		Ride ride = jdbcTemplate.queryForObject("select * from ride where id=?", new RideRowMapper(), id);
+		return ride;
+	}
 }
