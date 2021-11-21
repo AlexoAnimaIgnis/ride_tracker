@@ -23,4 +23,16 @@ public class RideServiceImpl implements RideService {
 	public Ride createRide(Ride ride) {
 		return rideRepository.createRide(ride);
 	}
+
+	@Override
+	public Ride getRide(int id) {
+		return rideRepository.getRide(id);
+	}
+
+	@Override
+	public Ride updateRide(Ride ride) {
+		return rideRepository.updateRide(ride);
+	}
+
+
 }
