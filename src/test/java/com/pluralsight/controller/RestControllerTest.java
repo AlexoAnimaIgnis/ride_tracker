@@ -78,4 +78,12 @@ public class RestControllerTest {
 		template.delete("http://localhost:8080/ride_tracker_war/delete/4",
 				Object.class);
 	}
+
+	@Test(timeout = 30000)
+	public void testException() {
+		RestTemplate template = new RestTemplate();
+
+		template.getForObject("http://localhost:8080/ride_tracker_war/test",
+				Ride.class);
+	}
 }

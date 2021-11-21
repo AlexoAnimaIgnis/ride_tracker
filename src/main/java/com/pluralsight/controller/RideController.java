@@ -2,7 +2,11 @@ package com.pluralsight.controller;
 
 import java.util.List;
 
+import com.pluralsight.util.ServiceError;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,5 +49,17 @@ public class RideController {
 	public @ResponseBody Object delete(@PathVariable(value = "id") Integer id) {
 		rideService.delete(id);
 		return null;
+	}
+
+	@RequestMapping(value = "/test", method = RequestMethod.GET)
+	public @ResponseBody Ride test() {
+		throw new DataAccessException("Testing error thrown") {
+		};
+	}
+
+	@ExceptionHandler(RuntimeException.class)
+	public ResponseEntity<ServiceError> handle(RuntimeException exception) {
+		ServiceError serviceError = new ServiceError(HttpStatus.OK.value(), exception.getMessage());
+		return new ResponseEntity<>(serviceError, HttpStatus.OK);
 	}
 }
