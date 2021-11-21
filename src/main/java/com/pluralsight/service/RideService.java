@@ -13,4 +13,6 @@ public interface RideService {
 	Ride getRide(int id);
 
 	Ride updateRide(Ride ride);
+
+	void batch();
 }
