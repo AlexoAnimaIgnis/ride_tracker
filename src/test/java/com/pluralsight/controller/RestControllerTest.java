@@ -75,7 +75,7 @@ public class RestControllerTest {
 	public void testDelete() {
 		RestTemplate template = new RestTemplate();
 
-		template.delete("http://localhost:8080/ride_tracker_war/delete/2",
+		template.delete("http://localhost:8080/ride_tracker_war/delete/4",
 				Object.class);
 	}
 }
